@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindBridge Login / Sign Up</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            min-height: 600px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-wrapper {
+            width: 100%;
+        }
+        .form-panel {
+            width: 100%;
+            padding: 3rem 2.5rem;
+            box-sizing: border-box;
+            transition: opacity 0.4s;
+        }
+        .form-panel.hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+        }
+        .form-panel h2 {
+            color: #4c63d2;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #4c63d2;
+            box-shadow: 0 0 0 3px rgba(76,99,210,0.1);
+        }
+        .btn {
+            background: linear-gradient(135deg, #4c63d2, #7c3aed);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76,99,210,0.4);
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #4c63d2;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-wrapper">
+            <!-- Login Panel -->
+            <div class="form-panel" id="loginPanel">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="login-username">Username</label>
+                        <input type="text" id="login-username" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-user-type">User Type</label>
+                        <select id="login-user-type" class="form-select" required>
+                            <option value="student">Student</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div id="login-error" class="error-message"></div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                <button class="toggle-btn" onclick="showSignUp()">Don't have an account? Sign Up</button>
+            </div>
+            <!-- Sign Up Panel -->
+            <div class="form-panel hidden" id="signUpPanel">
+                <h2>Sign Up</h2>
+                <form id="signUpForm">
+                    <div class="form-group">
+                        <label class="form-label" for="signup-username">Username</label>
+                        <input type="text" id="signup-username" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email</label>
+                        <input type="email" id="signup-email" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <input type="password" id="signup-password" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-user-type">User Type</label>
+                        <select id="signup-user-type" class="form-select" required>
+                            <option value="student">Student</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div id="signup-error" class="error-message"></div>
+                    <button type="submit" class="btn">Sign Up</button>
+                </form>
+                <button class="toggle-btn" onclick="showLogin()">Already have an account? Login</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Show only one panel at a time
+        function showSignUp() {
+            document.getElementById('loginPanel').classList.add('hidden');
+            document.getElementById('signUpPanel').classList.remove('hidden');
+        }
+        function showLogin() {
+            document.getElementById('signUpPanel').classList.add('hidden');
+            document.getElementById('loginPanel').classList.remove('hidden');
+        }
+
+        // Demo users
+        const demoUsers = [
+            { username: 'student1', password: 'studentpass', type: 'student' },
+            { username: 'admin1', password: 'adminpass', type: 'admin' }
+        ];
+
+        // Login handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const userType = document.getElementById('login-user-type').value;
+            const errorMsg = document.getElementById('login-error');
+            const user = demoUsers.find(u => u.username === username && u.password === password && u.type === userType);
+            if (user) {
+                localStorage.setItem('mindbridge_user', JSON.stringify(user));
+                window.location.href = 'mental_health_platform.html';
+            } else {
+                errorMsg.textContent = 'Invalid credentials or user type.';
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        // Sign Up handler (demo only)
+        document.getElementById('signUpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('signup-username').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const userType = document.getElementById('signup-user-type').value;
+            const errorMsg = document.getElementById('signup-error');
+            // Password requirement: at least 8 chars, one number, one special char
+            const passwordValid = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/.test(password);
+            // Email requirement: valid email format
+            const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            if (!emailValid) {
+                errorMsg.textContent = 'Please enter a valid email address.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            if (!passwordValid) {
+                errorMsg.textContent = 'Password must be at least 8 characters, include a number and a special character.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            if (username && email && password && userType) {
+                demoUsers.push({ username, password, type: userType });
+                errorMsg.style.display = 'none';
+                showLogin();
+                alert('Sign up successful! You can now log in.');
+            } else {
+                errorMsg.textContent = 'Please fill all fields.';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

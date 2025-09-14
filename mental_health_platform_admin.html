@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindBridge - Digital Psychological Intervention System</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #5481f4be 0%, #764ba2 100%); min-height: 100vh; color: #333; }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; box-shadow: 0 0 30px rgba(0,0,0,0.1); position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; color: #4c63d2; margin-bottom: 2rem; padding: 0 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; margin: 0.25rem 0; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; color: #64748b; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: linear-gradient(135deg, #4c63d2, #7c3aed); color: white; transform: translateX(5px); }
+        .nav-icon { font-size: 1.2rem; }
+        .main-content { flex: 1; margin-left: 280px; padding: 2rem; }
+        .header { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 1.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header h1 { color: #1e293b; font-size: 2rem; margin-bottom: 0.5rem; }
+        .header p { color: #64748b; font-size: 1.1rem; }
+        .content-section { display: none; animation: fadeIn 0.5s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
+        .card:hover { transform: translateY(-5px); }
+        .card h2 { color: #1e293b; margin-bottom: 1rem; font-size: 1.5rem; }
+        .card h3 { color: #4c63d2; margin-bottom: 1rem; font-size: 1.3rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: linear-gradient(135deg, #4c63d2, #7c3aed); color: white; padding: 2rem; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(76,99,210,0.3); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 1rem; opacity: 0.9; }
+        .chat-container { height: 500px; display: flex; flex-direction: column; border: 1px solid #e2e8f0; border-radius: 15px; overflow: hidden; }
+        .chat-header { background: linear-gradient(135deg, #4c63d2, #7c3aed); color: white; padding: 1rem; font-weight: 600; }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; }
+        .message { margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+        .message.user { flex-direction: row-reverse; }
+        .message-bubble { background: white; padding: 1rem; border-radius: 15px; max-width: 70%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .message.user .message-bubble { background: linear-gradient(135deg, #4c63d2, #7c3aed); color: white; }
+        .chat-input { display: flex; padding: 1rem; gap: 0.5rem; background: white; }
+        .chat-input input { flex: 1; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; font-size: 1rem; }
+        .chat-input button { background: linear-gradient(135deg, #4c63d2, #7c3aed); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; cursor: pointer; font-weight: 600; transition: transform 0.2s ease; }
+        .chat-input button:hover { transform: scale(1.05); }
+        .admin-analytics { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .chart-container { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        @media (max-width: 900px) { .admin-analytics { grid-template-columns: 1fr; } .main-content { margin-left: 0; padding: 1rem; } .sidebar { width: 100%; position: relative; height: auto; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">🧠 MindBridge</div>
+            <div class="nav-item active" data-section="dashboard"><span class="nav-icon">📊</span>Dashboard</div>
+            <div class="nav-item" data-section="ai-support"><span class="nav-icon">🤖</span>AI Support Chat</div>
+            <div class="nav-item" data-section="appointments"><span class="nav-icon">📅</span>Book Appointment</div>
+            <div class="nav-item" data-section="resources"><span class="nav-icon">📚</span>Resource Hub</div>
+            <div class="nav-item" data-section="peer-support"><span class="nav-icon">👥</span>Peer Support</div>
+            <div class="nav-item" data-section="assessment"><span class="nav-icon">📋</span>Self Assessment</div>
+            <div class="nav-item" data-section="admin"><span class="nav-icon">⚙️</span>Admin Dashboard</div>
+        </nav>
+        <main class="main-content">
+            <section id="dashboard" class="content-section active">
+                <div class="header">
+                    <h1>Welcome to MindBridge</h1>
+                    <p>Your comprehensive digital mental health support system</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-number">1,245</div><div class="stat-label">Total Users</div></div>
+                    <div class="stat-card"><div class="stat-number">3,456</div><div class="stat-label">Total Appointments</div></div>
+                    <div class="stat-card"><div class="stat-number">150</div><div class="stat-label">Resources</div></div>
+                    <div class="stat-card"><div class="stat-number">320</div><div class="stat-label">Upcoming Appointments</div></div>
+                </div>
+            </section>
+            <section id="ai-support" class="content-section">
+                <div class="header">
+                    <h1>AI Mental Health Support</h1>
+                    <p>Chat with our AI counselor for immediate support and coping strategies</p>
+                </div>
+                <div class="card">
+                    <div class="chat-container">
+                        <div class="chat-header">🤖 MindBridge AI Counselor - Available 24/7</div>
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message"><div class="message-bubble">Hello! I'm here to support you. How are you feeling today?</div></div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chat-input" placeholder="Type your message here..." onkeypress="handleChatEnter(event)">
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="appointments" class="content-section">
+                <div class="header"><h1>Book Counseling Appointment</h1><p>Schedule a confidential session with our qualified counselors</p></div>
+                <div class="card"><h3>Schedule New Appointment</h3><form class="form-grid" onsubmit="event.preventDefault(); alert('Appointment booked!');"><div class="form-group"><label class="form-label">Preferred Counselor</label><select class="form-select" required><option value="">Select a counselor</option><option value="dr-sharma">Dr. Priya Sharma</option><option value="dr-kumar">Dr. Raj Kumar</option><option value="dr-patel">Dr. Meera Patel</option><option value="anonymous">Anonymous Session</option></select></div><div class="form-group"><label class="form-label">Appointment Type</label><select class="form-select" required><option value="">Select type</option><option value="individual">Individual Counseling</option><option value="group">Group Therapy</option><option value="emergency">Emergency Consultation</option><option value="followup">Follow-up Session</option></select></div><div class="form-group"><label class="form-label">Preferred Date</label><input type="date" class="form-input" required></div><div class="form-group"><label class="form-label">Preferred Time</label><select class="form-select" required><option value="">Select time</option><option value="09:00">9:00 AM</option><option value="10:00">10:00 AM</option><option value="11:00">11:00 AM</option><option value="14:00">2:00 PM</option><option value="15:00">3:00 PM</option><option value="16:00">4:00 PM</option></select></div><div class="form-group" style="grid-column: 1/-1;"><label class="form-label">Reason for Visit (Optional)</label><textarea class="form-textarea" placeholder="Briefly describe what you'd like to discuss..."></textarea></div><div class="form-group" style="grid-column: 1/-1;"><button type="submit" class="btn">Book Appointment</button></div></form></div>
+            </section>
+            <section id="resources" class="content-section">
+                <div class="header"><h1>Psychoeducational Resources</h1><p>Access curated mental health resources in multiple languages</p></div>
+                <div class="card"><h3>Featured Resources</h3><ul><li>Stress Management Techniques (Video)</li><li>Mindfulness for Students (Audio)</li><li>Understanding Depression (Article)</li><li>Anxiety Coping Strategies (Interactive)</li><li>Sleep Hygiene Guide (PDF)</li></ul></div>
+            </section>
+            <section id="peer-support" class="content-section">
+                <div class="header"><h1>Peer Support Community</h1><p>Connect with fellow students in a safe, moderated environment</p></div>
+                <div class="card"><h3>Recent Community Posts</h3><ul><li>JohnDoe92: Struggling with exam stress and feeling overwhelmed. Any advice?</li><li>JaneSmith88: Just had a great session with Dr. Sharma! Feeling more positive.</li><li>MentalHealthWarrior: Remember, it's okay to not be okay. Reach out for help if you need it.</li></ul></div>
+            </section>
+            <section id="assessment" class="content-section">
+                <div class="header"><h1>Self Assessment Tools</h1><p>Evaluate your mental health and track your progress</p></div>
+                <div class="card"><h3>Available Assessments</h3><ul><li>PHQ-9 Depression Scale</li><li>GAD-7 Anxiety Scale</li><li>Perceived Stress Scale</li><li>Wellness Assessment</li></ul></div>
+            </section>
+            <section id="admin" class="content-section">
+                <div class="header"><h1>Admin Dashboard</h1><p>Manage users, appointments, resources, and view analytics</p></div>
+                <div class="admin-analytics">
+                    <div class="chart-container">
+                        <h3>User Growth</h3>
+                        <canvas id="userChart" height="200"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Appointments Overview</h3>
+                        <canvas id="appointmentChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Resource Stats</h3>
+                    <ul>
+                        <li>Videos: 50</li>
+                        <li>Articles: 70</li>
+                        <li>Interactive Modules: 30</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        // Navigation logic
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(function(section) {
+                section.classList.remove('active');
+            });
+            var target = document.getElementById(sectionId);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(function(item) {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === sectionId) item.classList.add('active');
+            });
+        }
+        document.querySelectorAll('.nav-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var section = item.getAttribute('data-section');
+                if (section) showSection(section);
+            });
+        });
+        // AI chat logic
+        function sendMessage() {
+            var input = document.getElementById('chat-input');
+            var message = input.value.trim();
+            if (!message) return;
+            var chatMessages = document.getElementById('chat-messages');
+            var userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = '<div class="message-bubble">' + message + '</div>';
+            chatMessages.appendChild(userMsg);
+            input.value = '';
+            setTimeout(function() {
+                var aiMsg = document.createElement('div');
+                aiMsg.className = 'message';
+                aiMsg.innerHTML = '<div class="message-bubble">' + getPositiveReply() + '</div>';
+                chatMessages.appendChild(aiMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 600);
+        }
+        function handleChatEnter(event) { if (event.key === 'Enter') sendMessage(); }
+        function getPositiveReply() {
+            var replies = [
+                "You’ve got this! It’s okay to feel anxious. Remember, you are capable and prepared—take things one step at a time.",
+                "Hey, don’t be so hard on yourself! You matter, and your efforts are valuable. Comparison steals joy—focus on your progress.",
+                "You’re stronger than you realize! Start with small, manageable steps—progress grows from little actions.",
+                "You are never truly alone. Many people care about you, and reaching out for support can make a big difference.",
+                "Believe in yourself! Stress feels heavy, but it is temporary. You’ve overcome challenges before—you can do this too.",
+                "Please don’t give up—you are braver than you think! Brighter days are waiting ahead.",
+                "It’s okay to feel this way! Your emotions are valid. Try expressing them through journaling, talking to a friend, or deep breathing.",
+                "One setback doesn’t define you! A test does not measure your worth. Failure is a step towards growth—keep moving forward.",
+                "Take it easy—you deserve rest! Try calming routines like deep breathing or listening to soft music.",
+                "Hold on—you are stronger than this moment. Hope will return, and support is always available for you."
+            ];
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        // Admin analytics charts
+        window.onload = function() {
+            var userCtx = document.getElementById('userChart').getContext('2d');
+            new Chart(userCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    datasets: [{ label: 'Users', data: [200, 400, 600, 800, 1000, 1100, 1200, 1245], borderColor: '#4c63d2', backgroundColor: 'rgba(76,99,210,0.1)', fill: true }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+            var appCtx = document.getElementById('appointmentChart').getContext('2d');
+            new Chart(appCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed', 'Upcoming', 'Cancelled'],
+                    datasets: [{ label: 'Appointments', data: [3100, 320, 36], backgroundColor: ['#4c63d2', '#7c3aed', '#ef4444'] }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        };
+    </script>
+</body>
+</html>
