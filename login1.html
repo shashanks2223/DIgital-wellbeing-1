@@ -151,7 +151,6 @@
                         <label class="form-label" for="signup-user-type">User Type</label>
                         <select id="signup-user-type" class="form-select" required>
                             <option value="student">Student</option>
-                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <div id="signup-error" class="error-message"></div>
@@ -162,68 +161,104 @@
         </div>
     </div>
     <script>
-        // Show only one panel at a time
         function showSignUp() {
             document.getElementById('loginPanel').classList.add('hidden');
             document.getElementById('signUpPanel').classList.remove('hidden');
         }
+        
         function showLogin() {
             document.getElementById('signUpPanel').classList.add('hidden');
             document.getElementById('loginPanel').classList.remove('hidden');
         }
 
-        // Demo users
-        const demoUsers = [
-            { username: 'student1', password: 'studentpass', type: 'student' },
-            { username: 'admin1', password: 'adminpass', type: 'admin' }
-        ];
-
-        // Login handler
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             const userType = document.getElementById('login-user-type').value;
             const errorMsg = document.getElementById('login-error');
-            const user = demoUsers.find(u => u.username === username && u.password === password && u.type === userType);
-            if (user) {
-                localStorage.setItem('mindbridge_user', JSON.stringify(user));
-                window.location.href = 'mental_health_platform.html';
-            } else {
-                errorMsg.textContent = 'Invalid credentials or user type.';
+            
+            try {
+                const response = await fetch('http://localhost:3000/signin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        userType: userType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('mindbridge_user', JSON.stringify(data.user));
+                    window.location.href = 'mental_health_platform.html';
+                } else {
+                    errorMsg.textContent = data.error || 'Login failed';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Network error. Please try again.';
                 errorMsg.style.display = 'block';
             }
         });
 
-        // Sign Up handler (demo only)
-        document.getElementById('signUpForm').addEventListener('submit', function(e) {
+        // Handle signup form submission
+        document.getElementById('signUpForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const username = document.getElementById('signup-username').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const userType = document.getElementById('signup-user-type').value;
             const errorMsg = document.getElementById('signup-error');
-            // Password requirement: at least 8 chars, one number, one special char
+            
+            // Client-side validation
             const passwordValid = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/.test(password);
-            // Email requirement: valid email format
             const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            
             if (!emailValid) {
                 errorMsg.textContent = 'Please enter a valid email address.';
                 errorMsg.style.display = 'block';
                 return;
             }
+            
             if (!passwordValid) {
                 errorMsg.textContent = 'Password must be at least 8 characters, include a number and a special character.';
                 errorMsg.style.display = 'block';
                 return;
             }
-            if (username && email && password && userType) {
-                demoUsers.push({ username, password, type: userType });
-                errorMsg.style.display = 'none';
-                showLogin();
-                alert('Sign up successful! You can now log in.');
-            } else {
-                errorMsg.textContent = 'Please fill all fields.';
+            
+            try {
+                const response = await fetch('http://localhost:3000/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        userType: userType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    errorMsg.style.display = 'none';
+                    showLogin();
+                    alert('Sign up successful! You can now log in.');
+                } else {
+                    errorMsg.textContent = data.error || 'Signup failed';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Network error. Please try again.';
                 errorMsg.style.display = 'block';
             }
         });
