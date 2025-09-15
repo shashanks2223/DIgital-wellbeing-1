@@ -1,0 +1,28 @@
+{
+  "name": "sih",
+  "version": "1.0.0",
+  "description": "digital wellbeing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shashanks2223/DIgital-wellbeing-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/shashanks2223/DIgital-wellbeing-1/issues"
+  },
+  "homepage": "https://github.com/shashanks2223/DIgital-wellbeing-1#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  }
+}
